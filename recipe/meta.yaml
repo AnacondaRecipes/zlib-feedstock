@@ -12,16 +12,12 @@ source:
 build:
     number: 0
     features:
-        - vc9  # [win and py27]
-        - vc10  # [win and py34]
-        - vc14  # [win and py>=35]
-    skip: true  # [win and py>35]
+        - vc{{ vc }} # [win]
 
 requirements:
     build:
-        - python  # [win]
         - cmake  # [win]
-        - msinttypes  # [win and py<35]
+        - msinttypes  # [win]
         - {{ compiler('c') }}
 
 test:
