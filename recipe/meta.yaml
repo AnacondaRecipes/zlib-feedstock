@@ -9,7 +9,14 @@ source:
     sha256: c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
 
 build:
+{% if bootstrapping == 'yes' %}
+    # Please increment by two
+    number: 0
+    string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}_bootstrapping
+{% else %}
+    # Keep above the number of the _bootstrapping package
     number: 5
+{% endif %}
     run_exports:
         # mostly OK, but some scary symbol removal.  Let's try for trusting them.
         #    https://abi-laboratory.pro/tracker/timeline/zlib/
@@ -19,11 +26,13 @@ requirements:
     build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}  # [win32]
+{% if bootstrapping != 'yes' %}
         - cmake  # [win]
         - msinttypes  # [win and vc<14]
         - make  # [not win]
     host:
         - ripgrep
+{% endif %}
 
 test:
     commands:
