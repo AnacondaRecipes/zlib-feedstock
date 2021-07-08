@@ -1,15 +1,15 @@
-{% set version = "1.2.11" %}
+{% set version = "1.2.11.1" %}
 
 package:
     name: zlib
     version: {{ version }}
 
 source:
-    url: http://zlib.net/zlib-{{ version }}.tar.gz
-    sha256: c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
+    git_url: https://github.com/jtkukunas/zlib
+    git_rev: a43a247bfa16ec5368747b5b64f11ea5ca033010
 
 build:
-    number: 4
+    number: 0
     run_exports:
         # mostly OK, but some scary symbol removal.  Let's try for trusting them.
         #    https://abi-laboratory.pro/tracker/timeline/zlib/
