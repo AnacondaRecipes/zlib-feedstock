@@ -1,0 +1,6 @@
+[submodule "zlib-feedstock" ]
+    path = include/foo
+    branch = master
+    url = ../zlib-feedstock
+
+
