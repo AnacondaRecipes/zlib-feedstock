@@ -11,10 +11,12 @@ export CFLAGS="${CFLAGS} -fPIC"
 export CXXFLAGS="${CXXFLAGS} -fPIC"
 
 ./configure --prefix=${PREFIX}  \
-            --shared
+    --shared || (cat configure.log && false)
 
 make -j${CPU_COUNT} ${VERBOSE_AT}
-make check
+if [[ "$CONDA_BUILD_CROSS_COMPILATION" != "1" ]]; then
+    make check
+fi
 make install
 
 # Remove man files.
