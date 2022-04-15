@@ -30,7 +30,7 @@ cmake .. ${CMAKE_ARGS} \
 
 # Build.
 echo "Building..."
-make || exit 1
+make -d || exit 1
 
 
 # Perform tests.
