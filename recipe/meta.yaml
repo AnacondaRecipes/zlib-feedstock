@@ -41,7 +41,7 @@ test:
        - if not exist %PREFIX%/Library/bin/zlib.dll exit 1           # [win]
 
 about:
-    home: http://zlib.net/
+    home: https://zlib.net/
     # http://zlib.net/zlib_license.html
     license: Zlib
     summary: Massively spiffy yet delicately unobtrusive compression library
