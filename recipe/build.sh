@@ -11,6 +11,13 @@ fi
 export CFLAGS="${CFLAGS} -fPIC"
 export CXXFLAGS="${CXXFLAGS} -fPIC"
 
+# linux-aarch64 activations fails to set `ar` tool. This can be
+# removed when activations is corrected.
+if [[ "${target_platform}" == linux-aarch64 ]]; then
+  if [[ -n "$AR" ]]; then
+      CMAKE_ARGS="${CMAKE_ARGS} -DCMAKE_AR=${AR}"
+  fi
+fi
 
 # Isolate the build.
 mkdir -p Build
