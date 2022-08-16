@@ -9,9 +9,10 @@ source:
     sha256: 91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9
     patches:
         - cmake-pkg-config.patch
+        - CVE-2022-37434.patch 
 
 build:
-    number: 2
+    number: 3
     run_exports:
         # mostly OK, but some scary symbol removal.  Let's try for trusting them.
         #    https://abi-laboratory.pro/tracker/timeline/zlib/
