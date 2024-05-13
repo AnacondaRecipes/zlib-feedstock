@@ -28,5 +28,7 @@ del /f /q %src%\.INSTALL
 @REM robocopy will collect the mingw-64-* ucrt64/clang64/etc. directories as
 @REM well as the msys2-* usr directory
 
+call conda info
+
 robocopy /E /NFL /NDL /NP /NJH /NJS %src% %dst%
 if %ERRORLEVEL% GEQ 8 exit 1

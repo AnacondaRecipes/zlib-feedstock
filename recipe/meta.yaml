@@ -51,6 +51,7 @@ outputs:
         #- msys2-mingw-w64-mutex * ucrt64
     test:
       commands:
+        - call conda info
         - test -f $PREFIX/Library/ucrt64/bin/zlib1.dll                           # [unix]
         - IF NOT EXIST %PREFIX%\Library\ucrt64\bin\zlib1.dll EXIT /B 1           # [win]
     about:
