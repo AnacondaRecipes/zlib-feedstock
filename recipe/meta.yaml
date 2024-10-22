@@ -1,67 +1,171 @@
 {% set version = "1.2.13" %}
+{% set build_num = 4 %}
 
 package:
-    name: zlib
-    version: {{ version }}
+  name: zlib-split
+  version: {{ version }}
 
 source:
-    url: https://github.com/madler/zlib/releases/download/v{{ version }}/zlib-{{ version }}.tar.gz
-    sha256: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
-    patches:
-        - cmake-pkg-config.patch
+  url:
+    - https://zlib.net/fossils/zlib-{{ version }}.tar.gz
+#    - https://zlib.net/zlib-{{ version }}.tar.gz
+    - https://gnupg.org/ftp/gcrypt/zlib/zlib-{{ version }}.tar.gz
+  sha256: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+  patches:
+    # From https://github.com/madler/zlib/commit/ec3df00224d4b396e2ac6586ab5d25f673caa4c2
+#    - 0001-Correct-incorrect-inputs-provided-to-the-CRC-functio.patch
 
 build:
-    number: 1
-    run_exports:
-        # mostly OK, but some scary symbol removal.  Let's try for trusting them.
-        #    https://abi-laboratory.pro/tracker/timeline/zlib/
-        - {{ pin_subpackage('zlib', max_pin='x.x') }}
+  number: {{ build_num }}
 
 requirements:
-    build:
-        - {{ compiler('c') }}
-        - {{ compiler('cxx') }}  # [win32]
-        # Require `cmake-no-system` to break circular dependency;
-        # the `cmake` package on defaults requires `zstd`.
-        - cmake-no-system
-        - msinttypes  # [win and vc<14]
-        - make  # [not win]
-        - patch  # [not win]
-        - m2-patch  # [win]
-    host:
-        - ripgrep         # Should this be removed?
+  build:
+    - cmake                 # [win]
+    - msinttypes              # [win and vc<14]
+    # compiler on osx depends on zlib itself. Use the bootstrap compiler instead on osx
+    - {{ compiler('c') }}
+    - make                  # [unix]
+  run:
 
-test:
-    commands:
-       - test -f ${PREFIX}/include/zlib.h  # [unix]
-       - test -f ${PREFIX}/lib/libz.a      # [unix]
-       - test -f ${PREFIX}/lib/libz.so     # [linux]
-       - test -f ${PREFIX}/lib/libz.dylib  # [osx]
-       - if not exist %PREFIX%/Library/include/zlib.h exit 1         # [win]
-       - if not exist %PREFIX%/Library/lib/z.lib exit 1              # [win]
-       - if not exist %PREFIX%/Library/lib/zdll.lib exit 1           # [win]
-       - if not exist %PREFIX%/Library/lib/zlib.lib exit 1           # [win]
-       - if not exist %PREFIX%/Library/lib/zlibstatic.lib exit 1     # [win]
-       - if not exist %PREFIX%/Library/bin/zlib.dll exit 1           # [win]
+outputs:
+  - name: libzlib
+    build:
+      run_exports:
+        # mostly OK, but some scary symbol removal.  Let's try for trusting them.
+        #  https://abi-laboratory.pro/tracker/timeline/zlib/
+        - {{ pin_subpackage('libzlib', max_pin='x.x') }}
+    requirements:
+      build:
+        - {{ compiler('c') }}
+      host:
+      run:
+      run_constrained:
+        - zlib {{ version }} *_{{ build_num }}
+    files:
+      - lib/libz.so.*          # [linux]
+      - lib/libz.*.dylib       # [osx]
+      - Library/bin/zlib.dll   # [win]
+      - zlib.dll               # [win]
+    test:
+      commands:
+        - test ! -f ${PREFIX}/lib/libz.a            # [unix]
+        - test ! -f ${PREFIX}/lib/libz${SHLIB_EXT}  # [unix]
+        - test ! -f ${PREFIX}/include/zlib.h        # [unix]
+        - if not exist %LIBRARY_BIN%\zlib.dll exit 1  # [win]
+        - if not exist %PREFIX%\zlib.dll exit 1  # [win]
+
+  - name: libzlib-wapi
+    build:
+      skip: true  # [not win]
+      run_exports:
+        - {{ pin_subpackage('libzlib-wapi', max_pin='x.x') }}
+    requirements:
+      build:
+        - {{ compiler('c') }}
+      host:
+      run:
+      run_constrained:
+        - zlib {{ version }} *_{{ build_num }}
+        - zlib-wapi {{ version }} *_{{ build_num }}
+    files:
+      - Library/bin/zlibwapi.dll   # [win]
+    test:
+      commands:
+        - if not exist "%LIBRARY_BIN%\zlibwapi.dll" exit 1   # [win]
+
+  - name: zlib
+    build:
+      run_exports:
+        # mostly OK, but some scary symbol removal.  Let's try for trusting them.
+        #  https://abi-laboratory.pro/tracker/timeline/zlib/
+        - {{ pin_subpackage('libzlib', max_pin='x.x') }}
+    requirements:
+      build:
+        - {{ compiler('c') }}
+      host:
+        - {{ pin_subpackage('libzlib', exact=True) }}
+      run:
+        - {{ pin_subpackage('libzlib', exact=True) }}
+    files:
+      - lib/libz.so            # [linux]
+      - lib/libz.dylib         # [osx]
+      - include                # [unix]
+      - lib/pkgconfig          # [unix]
+      - lib/libz.a             # [unix]
+      - Library/include        # [win]
+      - Library/share          # [win]
+      - Library/lib/zlib.lib   # [win]
+      - Library/lib/zdll.lib   # [win]
+      - Library/lib/z.lib      # [win]
+      - Library/lib/zlibstatic.lib  # [win]
+      - Library/lib/pkgconfig  # [win]
+    test:
+      requires:
+        - {{ compiler('c') }}
+      files:
+        - test_compile_flags.bat
+        - test_compile_flags.c
+      commands:
+        - test -f ${PREFIX}/lib/libz.a            # [unix]
+        - test -f ${PREFIX}/lib/libz${SHLIB_EXT}  # [unix]
+        - test -f ${PREFIX}/include/zlib.h        # [unix]
+        - if not exist %LIBRARY_LIB%\zlibstatic.lib exit 1     # [win]
+        - if not exist %LIBRARY_LIB%\zlib.lib exit 1           # [win]
+        - if not exist %LIBRARY_LIB%\pkgconfig\zlib.pc exit 1  # [win]
+        - if not exist %LIBRARY_INC%\zlib.h exit 1             # [win]
+        - if exist %LIBRARY_LIB%\zlibwapi.lib exit 1           # [win]
+        - call test_compile_flags.bat  # [win]
+
+  - name: zlib-wapi
+    build:
+      skip: true  # [not win]
+      run_exports:
+        - {{ pin_subpackage('libzlib-wapi', max_pin='x.x') }}
+    requirements:
+      build:
+        - {{ compiler('c') }}
+      host:
+        - {{ pin_subpackage('libzlib-wapi', exact=True) }}
+        - {{ pin_subpackage('zlib', exact=True) }}
+      run:
+        - {{ pin_subpackage('libzlib-wapi', exact=True) }}
+        - {{ pin_subpackage('zlib', exact=True) }}
+    files:
+      - Library/lib/zlibwapi.lib   # [win]
+      - Library/include/zlib.h         # [win]
+    test:
+      requires:
+        - {{ compiler('c') }}
+      files:
+        - test_compile_flags.bat
+        - test_compile_flags.c
+      commands:
+        - if not exist %LIBRARY_LIB%\zlibwapi.lib exit 1   # [win]
+        - if not exist %LIBRARY_INC%\zlib.h exit 1         # [win]
+        - call test_compile_flags.bat "wapi"  # [win]
 
 about:
-    home: https://zlib.net/
-    # http://zlib.net/zlib_license.html
-    license: Zlib
-    summary: Massively spiffy yet delicately unobtrusive compression library
-    license_family: Other
-    # Note: we copy 'recipe/license.txt' which contains the header from `zlib.h`.
-    # Correct update of this recipe requires an update of `recipe/license.txt`.
-    license_file: zlib.h
-    description: |
-      zlib is designed to be a free, general-purpose, lossless data-compression
-      library for use on virtually any computer hardware and operating system.
-    doc_url: https://zlib.net/manual.html
-    dev_url: https://github.com/madler/zlib
+  home: http://zlib.net/
+  # http://zlib.net/zlib_license.html
+  license: Zlib
+  summary: Massively spiffy yet delicately unobtrusive compression library
+  license_family: Other
+  license_file: license.txt
+  description: |
+    zlib is designed to be a free, general-purpose, lossless data-compression
+    library for use on virtually any computer hardware and operating system.
+  doc_url: http://zlib.net/manual.html
+  dev_url: https://github.com/madler/zlib
 
 extra:
-    recipe-maintainers:
-        - groutr
-        - msarahan
-        - ocefpaf
-        - mingwandroid
+  anaconda-services:
+    ref: https://anaconda.zendesk.com/agent/tickets/55704
+    reason: Client request
+  recipe-maintainers:
+    - ianaobi
+  recipe-maintainers:
+    - groutr
+    - msarahan
+    - ocefpaf
+    - isuruf
+  feedstock-name: zlib
