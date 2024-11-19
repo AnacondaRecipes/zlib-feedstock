@@ -42,8 +42,6 @@ echo "Testing..."
 if [[ "$CONDA_BUILD_CROSS_COMPILATION" != "1" ]]; then
     make check
 fi
-#TODO: This maybe should be in the previous block
-ctest -VV --output-on-failure || exit 1
 
 # Installing
 echo "Installing..."
