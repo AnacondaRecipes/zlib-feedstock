@@ -29,7 +29,7 @@ requirements:
         - patch  # [not win]
         - m2-patch  # [win]
     host:
-        - ripgrep         # Should this be removed?
+        - ripgrep 14.1.0         # Should this be removed?
 
 test:
     commands:
