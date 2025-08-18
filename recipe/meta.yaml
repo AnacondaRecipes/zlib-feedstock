@@ -3,8 +3,8 @@
 {% set build_num = 0 %}
 
 # Platform-specific prefixes
-{% set win_lib_prefix = "Library/" %}
-{% set unix_lib_prefix = "lib/" %}
+{% set lib_prefix = "Library/" %}  # [win]
+{% set lib_prefix = "lib/" %}      # [unix]
 
 package:
   name: {{ name|lower }}-split
@@ -27,7 +27,7 @@ requirements:
 outputs:
   - name: lib{{ name }}
     run_exports:
-      - {{ pin_subpackage('libzlib', max_pin='x') }}
+      - {{ pin_subpackage('lib' + name, max_pin='x') }}
     requirements:
       build:
         - {{ stdlib('c') }}
@@ -35,23 +35,23 @@ outputs:
       run_constrained:
         - {{ name }} {{ version }} *_{{ build_num }}
     files:
-      - {{ unix_lib_prefix }}libz.so.*     # [linux]
-      - {{ unix_lib_prefix }}libz.*.dylib  # [osx]
-      - {{ win_lib_prefix }}bin/zlib.dll   # [win]
-      - zlib.dll                           # [win]
+      - {{ lib_prefix }}libz.so.*     # [linux]
+      - {{ lib_prefix }}libz.*.dylib  # [osx]
+      - {{ lib_prefix }}bin/zlib.dll  # [win]
+      - zlib.dll                      # [win]
     test:
       commands:
-        - test ! -f ${PREFIX}/{{ unix_lib_prefix }}libz.a            # [unix]
-        - test ! -f ${PREFIX}/{{ unix_lib_prefix }}libz${SHLIB_EXT}  # [unix]
-        - test ! -f ${PREFIX}/include/zlib.h                         # [unix]
-        - if not exist %LIBRARY_BIN%\zlib.dll exit 1                 # [win]
-        - if not exist %PREFIX%\zlib.dll exit 1                      # [win]
+        - test ! -f ${PREFIX}/{{ lib_prefix }}libz.a            # [unix]
+        - test ! -f ${PREFIX}/{{ lib_prefix }}libz${SHLIB_EXT}  # [unix]
+        - test ! -f ${PREFIX}/include/zlib.h                    # [unix]
+        - if not exist %LIBRARY_BIN%\zlib.dll exit 1            # [win]
+        - if not exist %PREFIX%\zlib.dll exit 1                 # [win]
 
   - name: lib{{ name }}-wapi
     build:
       skip: true  # [not win]
       run_exports:
-        - {{ pin_subpackage('libzlib-wapi', max_pin='x') }}
+        - {{ pin_subpackage('lib' + name + '-wapi', max_pin='x') }}
     requirements:
       build:
         - {{ stdlib('c') }}
@@ -60,7 +60,7 @@ outputs:
         - {{ name }} {{ version }} *_{{ build_num }}
         - {{ name }}-wapi {{ version }} *_{{ build_num }}
     files:
-      - {{ win_lib_prefix }}bin/zlibwapi.dll  # [win]
+      - {{ lib_prefix }}bin/zlibwapi.dll  # [win]
     test:
       commands:
         - if not exist "%LIBRARY_BIN%\zlibwapi.dll" exit 1  # [win]
@@ -68,28 +68,28 @@ outputs:
   - name: {{ name }}
     build:
       run_exports:
-        - {{ pin_subpackage('libzlib', max_pin='x') }}
+        - {{ pin_subpackage('lib' + name, max_pin='x') }}
     requirements:
       build:
         - {{ stdlib('c') }}
         - {{ compiler('c') }}
       host:
-        - {{ pin_subpackage('libzlib', exact=True) }}
+        - {{ pin_subpackage('lib' + name, exact=True) }}
       run:
-        - {{ pin_subpackage('libzlib', exact=True) }}
+        - {{ pin_subpackage('lib' + name, exact=True) }}
     files:
-      - {{ unix_lib_prefix }}libz.so            # [linux]
-      - {{ unix_lib_prefix }}libz.dylib         # [osx]
-      - include                                 # [unix]
-      - {{ unix_lib_prefix }}pkgconfig          # [unix]
-      - {{ unix_lib_prefix }}libz.a             # [unix]
-      - {{ win_lib_prefix }}include             # [win]
-      - {{ win_lib_prefix }}share               # [win]
-      - {{ win_lib_prefix }}lib/zlib.lib        # [win]
-      - {{ win_lib_prefix }}lib/zdll.lib        # [win]
-      - {{ win_lib_prefix }}lib/z.lib           # [win]
-      - {{ win_lib_prefix }}lib/zlibstatic.lib  # [win]
-      - {{ win_lib_prefix }}lib/pkgconfig       # [win]
+      - {{ lib_prefix }}libz.so             # [linux]
+      - {{ lib_prefix }}libz.dylib          # [osx]
+      - include                             # [unix]
+      - {{ lib_prefix }}pkgconfig           # [unix]
+      - {{ lib_prefix }}libz.a              # [unix]
+      - {{ lib_prefix }}include             # [win]
+      - {{ lib_prefix }}share               # [win]
+      - {{ lib_prefix }}lib/zlib.lib        # [win]
+      - {{ lib_prefix }}lib/zdll.lib        # [win]
+      - {{ lib_prefix }}lib/z.lib           # [win]
+      - {{ lib_prefix }}lib/zlibstatic.lib  # [win]
+      - {{ lib_prefix }}lib/pkgconfig       # [win]
     test:
       requires:
         - {{ compiler('c') }}
@@ -97,34 +97,34 @@ outputs:
         - test_compile_flags.bat
         - test_compile_flags.c
       commands:
-        - test -f ${PREFIX}/{{ unix_lib_prefix }}libz.a            # [unix]
-        - test -f ${PREFIX}/{{ unix_lib_prefix }}libz${SHLIB_EXT}  # [unix]
-        - test -f ${PREFIX}/include/zlib.h                         # [unix]
-        - if not exist %LIBRARY_LIB%\zlibstatic.lib exit 1         # [win]
-        - if not exist %LIBRARY_LIB%\zlib.lib exit 1               # [win]
-        - if not exist %LIBRARY_LIB%\pkgconfig\zlib.pc exit 1      # [win]
-        - if not exist %LIBRARY_INC%\zlib.h exit 1                 # [win]
-        - if exist %LIBRARY_LIB%\zlibwapi.lib exit 1               # [win]
-        - call test_compile_flags.bat                              # [win]
+        - test -f ${PREFIX}/{{ lib_prefix }}libz.a             # [unix]
+        - test -f ${PREFIX}/{{ lib_prefix }}libz${SHLIB_EXT}   # [unix]
+        - test -f ${PREFIX}/include/zlib.h                     # [unix]
+        - if not exist %LIBRARY_LIB%\zlibstatic.lib exit 1     # [win]
+        - if not exist %LIBRARY_LIB%\zlib.lib exit 1           # [win]
+        - if not exist %LIBRARY_LIB%\pkgconfig\zlib.pc exit 1  # [win]
+        - if not exist %LIBRARY_INC%\zlib.h exit 1             # [win]
+        - if exist %LIBRARY_LIB%\zlibwapi.lib exit 1           # [win]
+        - call test_compile_flags.bat                          # [win]
 
   - name: {{ name }}-wapi
     build:
       skip: true  # [not win]
       run_exports:
-        - {{ pin_subpackage('libzlib-wapi', max_pin='x') }}
+        - {{ pin_subpackage('lib' + name + '-wapi', max_pin='x') }}
     requirements:
       build:
         - {{ stdlib('c') }}
         - {{ compiler('c') }}
       host:
-        - {{ pin_subpackage('libzlib-wapi', exact=True) }}
-        - {{ pin_subpackage('zlib', exact=True) }}
+        - {{ pin_subpackage('lib' + name + '-wapi', exact=True) }}
+        - {{ pin_subpackage(name, exact=True) }}
       run:
-        - {{ pin_subpackage('libzlib-wapi', exact=True) }}
-        - {{ pin_subpackage('zlib', exact=True) }}
+        - {{ pin_subpackage('lib' + name + '-wapi', exact=True) }}
+        - {{ pin_subpackage(name, exact=True) }}
     files:
-      - {{ win_lib_prefix }}lib/zlibwapi.lib   # [win]
-      - {{ win_lib_prefix }}include/zlib.h     # [win]
+      - {{ lib_prefix }}lib/zlibwapi.lib   # [win]
+      - {{ lib_prefix }}include/zlib.h     # [win]
     test:
       requires:
         - {{ compiler('c') }}
