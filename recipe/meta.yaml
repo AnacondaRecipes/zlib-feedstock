@@ -1,6 +1,5 @@
 {% set name = "zlib" %}
 {% set version = "1.3.1" %}
-{% set build_num = 0 %}
 
 # Platform-specific prefixes
 {% set lib_prefix = "Library/" %}  # [win]
@@ -15,7 +14,7 @@ source:
   sha256: 9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23
 
 build:
-  number: {{ build_num }}
+  number: 0
 
 requirements:
   build:
@@ -33,7 +32,7 @@ outputs:
         - {{ stdlib('c') }}
         - {{ compiler('c') }}
       run_constrained:
-        - {{ name }} {{ version }} *_{{ build_num }}
+        - {{ name }} {{ version }}
     files:
       - {{ lib_prefix }}libz.so.*     # [linux]
       - {{ lib_prefix }}libz.*.dylib  # [osx]
@@ -57,8 +56,8 @@ outputs:
         - {{ stdlib('c') }}
         - {{ compiler('c') }}
       run_constrained:
-        - {{ name }} {{ version }} *_{{ build_num }}
-        - {{ name }}-wapi {{ version }} *_{{ build_num }}
+        - {{ name }} {{ version }}
+        - {{ name }}-wapi {{ version }}
     files:
       - {{ lib_prefix }}bin/zlibwapi.dll  # [win]
     test:
