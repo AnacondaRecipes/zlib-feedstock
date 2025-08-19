@@ -67,3 +67,6 @@ copy %LIBRARY_LIB%\zlib.lib %LIBRARY_LIB%\zdll.lib || exit 1
 
 :: python>=3.10 depend on this being at %PREFIX%
 copy %LIBRARY_BIN%\zlib.dll %PREFIX%\zlib.dll || exit 1
+
+:: Remove man files.
+if exist %PREFIX%\share rmdir /s /q %PREFIX%\share
