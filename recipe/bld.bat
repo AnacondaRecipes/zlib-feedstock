@@ -4,11 +4,6 @@ set LIB=%LIBRARY_LIB%;%LIB%
 set LIBPATH=%LIBRARY_LIB%;%LIBPATH%
 set INCLUDE=%LIBRARY_INC%;%INCLUDE%;%RECIPE_DIR%
 
-echo if( DEFINED ZLIB_OUTPUT_NAME ) >> "CMakeLists.txt"
-echo     set_target_properties(zlib PROPERTIES OUTPUT_NAME ${ZLIB_OUTPUT_NAME}) >> "CMakeLists.txt"
-echo endif() >> "CMakeLists.txt"
-echo message("CMAKE_CROSS_COMPILING: ${CMAKE_CROSSCOMPILING}") >> "CMakeLists.txt"
-
 :: Configure.
 :: -DZLIB_WINAPI switches to WINAPI calling convention. See Q7 in DLL_FAQ.txt.
 cmake -G "NMake Makefiles" ^
@@ -30,7 +25,7 @@ if errorlevel 1 exit 1
 :: Test.
 :: TODO: check if there exists a emulator
 if NOT "%CONDA_BUILD_CROSS_COMPILATION%" == "1" (
-  ctest
+  ctest --output-on-failure
   if errorlevel 1 exit 1
 )
 
@@ -60,7 +55,7 @@ if errorlevel 1 exit 1
 
 :: Test.
 if NOT "%CONDA_BUILD_CROSS_COMPILATION%" == "1" (
-  ctest
+  ctest --output-on-failure
   if errorlevel 1 exit 1
 )
 

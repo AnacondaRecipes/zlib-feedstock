@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 15ceebe..c1f3a3a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -216,3 +216,10 @@ if(ZLIB_BUILD_EXAMPLES)
+         set_target_properties(minigzip64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
+     endif()
+ endif()
++
++
++if( DEFINED ZLIB_OUTPUT_NAME )
++    set_target_properties(zlib PROPERTIES OUTPUT_NAME ${ZLIB_OUTPUT_NAME})
++endif()
++message("CMAKE_CROSS_COMPILING: ${CMAKE_CROSSCOMPILING}")
++
