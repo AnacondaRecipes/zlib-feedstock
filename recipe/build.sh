@@ -19,6 +19,3 @@ if [[ "$CONDA_BUILD_CROSS_COMPILATION" != "1" && "${CROSSCOMPILING_EMULATOR}" ==
     make check
 fi
 make install
-
-# Remove man files.
-rm -rf $PREFIX/share

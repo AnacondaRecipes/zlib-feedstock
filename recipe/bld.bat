@@ -2,7 +2,7 @@
 
 set LIB=%LIBRARY_LIB%;%LIB%
 set LIBPATH=%LIBRARY_LIB%;%LIBPATH%
-set INCLUDE=%LIBRARY_INC%;%INCLUDE%;%RECIPE_DIR%
+set INCLUDE=%LIBRARY_INC%;%INCLUDE%
 
 :: Configure.
 :: -DZLIB_WINAPI switches to WINAPI calling convention. See Q7 in DLL_FAQ.txt.
@@ -29,9 +29,9 @@ if NOT "%CONDA_BUILD_CROSS_COMPILATION%" == "1" (
   if errorlevel 1 exit 1
 )
 
-:: Copy built zlibwapi.dll with the same name provided by http://www.winimage.com/zLibDll/
+:: Copy built zlibwapi.dll with the same name provided by https://www.winimage.com/zLibDll/index.html
 :: This is needed for example for cuDNN
-:: https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html#install-zlib-windows
+:: https://docs.nvidia.com/deeplearning/cudnn/archives/cudnn-890/install-guide/index.html#install-zlib-windows
 copy "zlibwapi.dll" "%LIBRARY_BIN%\zlibwapi.dll" || exit 1
 copy "zlibwapi.lib" "%LIBRARY_LIB%\zlibwapi.lib" || exit 1
 
@@ -67,6 +67,3 @@ copy %LIBRARY_LIB%\zlib.lib %LIBRARY_LIB%\zdll.lib || exit 1
 
 :: python>=3.10 depend on this being at %PREFIX%
 copy %LIBRARY_BIN%\zlib.dll %PREFIX%\zlib.dll || exit 1
-
-:: Remove man files.
-if exist %PREFIX%\share rmdir /s /q %PREFIX%\share
