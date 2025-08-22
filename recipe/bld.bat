@@ -11,7 +11,7 @@ cmake -G "NMake Makefiles" ^
       -D CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
       -D CMAKE_INSTALL_PREFIX:PATH=%LIBRARY_PREFIX% ^
       -D CMAKE_C_FLAGS="-DZLIB_WINAPI " ^
-      -D ZLIB_OUTPUT_NAME="zlibwapi" ^
+      -D OUTPUT_NAME="zlibwapi" ^
       %CMAKE_ARGS% %SRC_DIR%
 if errorlevel 1 exit 1
 
@@ -23,11 +23,9 @@ cmake --build %SRC_DIR% --config Release
 if errorlevel 1 exit 1
 
 :: Test.
-:: TODO: check if there exists a emulator
-if NOT "%CONDA_BUILD_CROSS_COMPILATION%" == "1" (
-  ctest --output-on-failure
-  if errorlevel 1 exit 1
-)
+ctest --output-on-failure
+if errorlevel 1 exit 1
+
 
 :: Copy built zlibwapi.dll with the same name provided by https://www.winimage.com/zLibDll/index.html
 :: This is needed for example for cuDNN
@@ -54,10 +52,8 @@ cmake --build %SRC_DIR% --target INSTALL --config Release --clean-first
 if errorlevel 1 exit 1
 
 :: Test.
-if NOT "%CONDA_BUILD_CROSS_COMPILATION%" == "1" (
-  ctest --output-on-failure
-  if errorlevel 1 exit 1
-)
+ctest --output-on-failure
+if errorlevel 1 exit 1
 
 :: Some OSS libraries are happier if z.lib exists, even though it's not typical on Windows.
 copy %LIBRARY_LIB%\zlib.lib %LIBRARY_LIB%\z.lib || exit 1
