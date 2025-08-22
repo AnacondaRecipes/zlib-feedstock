@@ -11,7 +11,7 @@ cmake -G "NMake Makefiles" ^
       -D CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
       -D CMAKE_INSTALL_PREFIX:PATH=%LIBRARY_PREFIX% ^
       -D CMAKE_C_FLAGS="-DZLIB_WINAPI " ^
-      -D OUTPUT_NAME="zlibwapi" ^
+      -D CMAKE_RELEASE_POSTFIX="wapi" ^
       %CMAKE_ARGS% %SRC_DIR%
 if errorlevel 1 exit 1
 
