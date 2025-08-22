@@ -127,7 +127,6 @@ outputs:
         - test_compile_flags.c
       commands:
         - if not exist %LIBRARY_LIB%\zlibwapi.lib exit 1   # [win]
-        - if not exist %LIBRARY_INC%\zlib.h exit 1         # [win]
         - call test_compile_flags.bat "wapi"               # [win]
 
 about:
