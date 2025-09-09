@@ -19,6 +19,7 @@ build:
 
 requirements:
     build:
+        - {{ stdlib('c') }}
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}  # [win32]
         # Require `cmake-no-system` to break circular dependency;
@@ -26,10 +27,6 @@ requirements:
         - cmake-no-system
         - msinttypes  # [win and vc<14]
         - make  # [not win]
-        - patch  # [not win]
-        - m2-patch  # [win]
-    host:
-        - ripgrep         # Should this be removed?
 
 test:
     commands:
