@@ -1,4 +1,5 @@
 #include <zlib.h>
+#include <stdio.h>
 
 int main()
 {
