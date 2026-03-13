@@ -63,6 +63,7 @@ if errorlevel 1 exit 1
 copy %LIBRARY_LIB%\z.lib  %LIBRARY_LIB%\zdll.lib      || exit 1
 copy %LIBRARY_LIB%\z.lib  %LIBRARY_LIB%\zlib.lib      || exit 1
 copy %LIBRARY_LIB%\zs.lib %LIBRARY_LIB%\zlibstatic.lib || exit 1
+copy %LIBRARY_BIN%\z.dll  %LIBRARY_BIN%\zlib.dll       || exit 1 
 copy %LIBRARY_BIN%\z.dll  %PREFIX%\zlib.dll            || exit 1
 
 :: Now copy winapi artifacts - LAST, after conda-build has
