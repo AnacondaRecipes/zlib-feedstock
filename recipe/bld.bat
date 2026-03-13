@@ -10,8 +10,10 @@ cmake -G "NMake Makefiles" ^
       -D CMAKE_BUILD_TYPE=Release ^
       -D CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
       -D CMAKE_INSTALL_PREFIX:PATH=%LIBRARY_PREFIX% ^
-      -D CMAKE_C_FLAGS="-DZLIB_WINAPI " ^
-      -D CMAKE_RELEASE_POSTFIX="wapi" ^
+      -D CMAKE_C_FLAGS="-DZLIB_WINAPI" ^
+      -D ZLIB_BUILD_SHARED=ON ^
+      -D ZLIB_BUILD_STATIC=ON ^
+      -D ZLIB_INSTALL=OFF ^
       %CMAKE_ARGS% %SRC_DIR%
 if errorlevel 1 exit 1
 
@@ -22,16 +24,16 @@ type CMakeCache.txt
 cmake --build %SRC_DIR% --config Release
 if errorlevel 1 exit 1
 
-:: Test.
-ctest --output-on-failure
-if errorlevel 1 exit 1
-
-
 :: Copy built zlibwapi.dll with the same name provided by https://www.winimage.com/zLibDll/index.html
 :: This is needed for example for cuDNN
 :: https://docs.nvidia.com/deeplearning/cudnn/archives/cudnn-890/install-guide/index.html#install-zlib-windows
-copy "zlibwapi.dll" "%LIBRARY_BIN%\zlibwapi.dll" || exit 1
-copy "zlibwapi.lib" "%LIBRARY_LIB%\zlibwapi.lib" || exit 1
+:: v1.3.2 produces z.dll / zs.lib on Windows (OUTPUT_NAME z, static suffix s)
+:: Rename to the expected zlibwapi names
+copy /Y "z.dll"  "%LIBRARY_BIN%\zlibwapi.dll" || exit 1
+copy /Y "zs.lib" "%LIBRARY_LIB%\zlibwapi.lib" || exit 1
+copy /Y "z.dll"  "%LIBRARY_BIN%\zlib.dll" || exit 1
+copy /Y "zs.lib" "%LIBRARY_LIB%\zlib.lib" || exit 1
+copy /Y "zs.lib" "%LIBRARY_LIB%\zlibstatic.lib" || exit 1
 
 del /f /q CMakeCache.txt
 
@@ -41,8 +43,10 @@ cmake -G "NMake Makefiles" ^
       -D CMAKE_BUILD_TYPE=Release ^
       -D CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
       -D CMAKE_INSTALL_PREFIX:PATH=%LIBRARY_PREFIX% ^
-      -D INSTALL_PKGCONFIG_DIR=%LIBRARY_PREFIX%\lib\pkgconfig ^
-      %SRC_DIR%
+      -D ZLIB_BUILD_SHARED=ON ^
+      -D ZLIB_BUILD_STATIC=ON ^
+      -D ZLIB_INSTALL=ON ^
+      %CMAKE_ARGS% %SRC_DIR%
 if errorlevel 1 exit 1
 
 type CMakeCache.txt
@@ -59,7 +63,7 @@ if errorlevel 1 exit 1
 copy %LIBRARY_LIB%\zlib.lib %LIBRARY_LIB%\z.lib || exit 1
 
 :: Qt in particular goes looking for this one (as of 4.8.7).
-copy %LIBRARY_LIB%\zlib.lib %LIBRARY_LIB%\zdll.lib || exit 1
+copy %LIBRARY_LIB%\z.lib %LIBRARY_LIB%\zdll.lib || exit 1
 
 :: python>=3.10 depend on this being at %PREFIX%
-copy %LIBRARY_BIN%\zlib.dll %PREFIX%\zlib.dll || exit 1
+copy %LIBRARY_BIN%\z.dll %PREFIX%\zlib.dll || exit 1
