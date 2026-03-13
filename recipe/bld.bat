@@ -29,11 +29,10 @@ if errorlevel 1 exit 1
 :: https://docs.nvidia.com/deeplearning/cudnn/archives/cudnn-890/install-guide/index.html#install-zlib-windows
 :: v1.3.2 produces z.dll / zs.lib on Windows (OUTPUT_NAME z, static suffix s)
 :: Rename to the expected zlibwapi names
-copy /Y "z.dll"  "%LIBRARY_BIN%\zlibwapi.dll" || exit 1
-copy /Y "zs.lib" "%LIBRARY_LIB%\zlibwapi.lib" || exit 1
-copy /Y "z.dll"  "%LIBRARY_BIN%\zlib.dll" || exit 1
-copy /Y "zs.lib" "%LIBRARY_LIB%\zlib.lib" || exit 1
-copy /Y "zs.lib" "%LIBRARY_LIB%\zlibstatic.lib" || exit 1
+:: Stash winapi artifacts in a temp dir, do NOT touch %LIBRARY_*% yet
+mkdir "%SRC_DIR%\winapi_out"
+copy /Y "z.dll"  "%SRC_DIR%\winapi_out\zlibwapi.dll" || exit 1
+copy /Y "zs.lib" "%SRC_DIR%\winapi_out\zlibwapi.lib" || exit 1
 
 del /f /q CMakeCache.txt
 
@@ -59,11 +58,14 @@ if errorlevel 1 exit 1
 ctest --output-on-failure
 if errorlevel 1 exit 1
 
-:: Some OSS libraries are happier if z.lib exists, even though it's not typical on Windows.
-copy %LIBRARY_LIB%\zlib.lib %LIBRARY_LIB%\z.lib || exit 1
+:: Compat copies for regular zlib (z.lib is already installed
+:: as the DLL import lib; zs.lib is the static lib)
+copy %LIBRARY_LIB%\z.lib  %LIBRARY_LIB%\zdll.lib      || exit 1
+copy %LIBRARY_LIB%\z.lib  %LIBRARY_LIB%\zlib.lib      || exit 1
+copy %LIBRARY_LIB%\zs.lib %LIBRARY_LIB%\zlibstatic.lib || exit 1
+copy %LIBRARY_BIN%\z.dll  %PREFIX%\zlib.dll            || exit 1
 
-:: Qt in particular goes looking for this one (as of 4.8.7).
-copy %LIBRARY_LIB%\z.lib %LIBRARY_LIB%\zdll.lib || exit 1
-
-:: python>=3.10 depend on this being at %PREFIX%
-copy %LIBRARY_BIN%\z.dll %PREFIX%\zlib.dll || exit 1
+:: Now copy winapi artifacts - LAST, after conda-build has
+:: already seen the zlib package file list
+copy /Y "%SRC_DIR%\winapi_out\zlibwapi.dll" "%LIBRARY_BIN%\zlibwapi.dll" || exit 1
+copy /Y "%SRC_DIR%\winapi_out\zlibwapi.lib" "%LIBRARY_LIB%\zlibwapi.lib" || exit 1
