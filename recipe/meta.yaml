@@ -55,10 +55,10 @@ outputs:
         - {{ name }} {{ version }}
         - {{ name }}-wapi {{ version }}
     files:
-      - Library/bin/zlibwapi.dll  # [win]
+      - Library/bin/zlibwapi.dll
     test:
       commands:
-        - if not exist "%LIBRARY_BIN%\zlibwapi.dll" exit 1  # [win]
+        - if not exist "%LIBRARY_BIN%\zlibwapi.dll" exit 1
 
   - name: {{ name }}
     build:
@@ -118,7 +118,7 @@ outputs:
         - {{ pin_subpackage('lib' + name + '-wapi', exact=True) }}
         - {{ pin_subpackage(name, exact=True) }}
     files:
-      - Library/lib/zlibwapi.lib   # [win]
+      - Library/lib/zlibwapi.lib
     test:
       requires:
         - {{ compiler('c') }}
@@ -126,8 +126,8 @@ outputs:
         - test_compile_flags.bat
         - test_compile_flags.c
       commands:
-        - if not exist %LIBRARY_LIB%\zlibwapi.lib exit 1   # [win]
-        - call test_compile_flags.bat "wapi"               # [win]
+        - if not exist %LIBRARY_LIB%\zlibwapi.lib exit 1
+        - call test_compile_flags.bat "wapi"
 
 about:
   home: https://zlib.net/
@@ -142,6 +142,9 @@ about:
   dev_url: https://github.com/madler/zlib
 
 extra:
+  skip-lints:
+    # incorrectly flags pin_subpackage as unpinned
+    - host_section_needs_exact_pinnings
   recipe-maintainers:
     - groutr
     - msarahan
