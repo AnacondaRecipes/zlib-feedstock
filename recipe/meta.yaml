@@ -33,7 +33,6 @@ outputs:
       - lib/libz.so.*         # [linux]
       - lib/libz.*.dylib      # [osx]
       - Library/bin/zlib.dll  # [win]
-      - Library/bin/z.dll     # [win]
       - zlib.dll              # [win]
     test:
       commands:
@@ -41,7 +40,6 @@ outputs:
         - test ! -f ${PREFIX}/lib/libz${SHLIB_EXT}    # [unix]
         - test ! -f ${PREFIX}/include/zlib.h          # [unix]
         - if not exist %LIBRARY_BIN%\zlib.dll exit 1  # [win]
-        - if not exist %LIBRARY_BIN%\z.dll exit 1     # [win]
         - if not exist %PREFIX%\zlib.dll exit 1       # [win]
 
   - name: lib{{ name }}-wapi
