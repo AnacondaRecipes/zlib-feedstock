@@ -4,14 +4,21 @@ set LIB=%LIBRARY_LIB%;%LIB%
 set LIBPATH=%LIBRARY_LIB%;%LIBPATH%
 set INCLUDE=%LIBRARY_INC%;%INCLUDE%
 
+:: zlib 1.3.2 hardcodes OUTPUT_NAME to "z". Override it back to match 1.3.1 names.
+:: This ensures DLLs get the expected internal PE names (zlib.dll, zlibwapi.dll)
+:: and import libs reference the correct DLL filenames.
+echo if( DEFINED ZLIB_OUTPUT_NAME ) >> "CMakeLists.txt"
+echo     set_target_properties(zlib PROPERTIES OUTPUT_NAME ${ZLIB_OUTPUT_NAME}) >> "CMakeLists.txt"
+echo endif() >> "CMakeLists.txt"
+
 :: Configure.
 :: -DZLIB_WINAPI switches to WINAPI calling convention. See Q7 in DLL_FAQ.txt.
 cmake -G "NMake Makefiles" ^
       -D CMAKE_BUILD_TYPE=Release ^
       -D CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
       -D CMAKE_INSTALL_PREFIX:PATH=%LIBRARY_PREFIX% ^
-      -D CMAKE_C_FLAGS="-DZLIB_WINAPI " ^
-      -D CMAKE_RELEASE_POSTFIX="wapi" ^
+      -D CMAKE_C_FLAGS="-DZLIB_WINAPI" ^
+      -D ZLIB_OUTPUT_NAME="zlibwapi" ^
       %CMAKE_ARGS% %SRC_DIR%
 if errorlevel 1 exit 1
 
@@ -25,7 +32,6 @@ if errorlevel 1 exit 1
 :: Test.
 ctest --output-on-failure
 if errorlevel 1 exit 1
-
 
 :: Copy built zlibwapi.dll with the same name provided by https://www.winimage.com/zLibDll/index.html
 :: This is needed for example for cuDNN
@@ -41,8 +47,9 @@ cmake -G "NMake Makefiles" ^
       -D CMAKE_BUILD_TYPE=Release ^
       -D CMAKE_PREFIX_PATH=%LIBRARY_PREFIX% ^
       -D CMAKE_INSTALL_PREFIX:PATH=%LIBRARY_PREFIX% ^
+      -D ZLIB_OUTPUT_NAME="zlib" ^
       -D INSTALL_PKGCONFIG_DIR=%LIBRARY_PREFIX%\lib\pkgconfig ^
-      %SRC_DIR%
+      %CMAKE_ARGS% %SRC_DIR%
 if errorlevel 1 exit 1
 
 type CMakeCache.txt
@@ -57,6 +64,9 @@ if errorlevel 1 exit 1
 
 :: Some OSS libraries are happier if z.lib exists, even though it's not typical on Windows.
 copy %LIBRARY_LIB%\zlib.lib %LIBRARY_LIB%\z.lib || exit 1
+
+:: Install zlibstatic.lib for backwards compat.
+move %LIBRARY_LIB%\zs.lib %LIBRARY_LIB%\zlibstatic.lib || exit 1
 
 :: Qt in particular goes looking for this one (as of 4.8.7).
 copy %LIBRARY_LIB%\zlib.lib %LIBRARY_LIB%\zdll.lib || exit 1
